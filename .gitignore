@@ -1,0 +1,23 @@
+# Environment — never commit credentials
+backend/.env
+
+# Composer
+backend/vendor/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Uploaded files — served via PHP proxy, never committed
+backend/files/uploads/*
+!backend/files/uploads/.htaccess
+!backend/files/uploads/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE & Tooling
+.claude/
+.vscode/
+.idea/
