@@ -5,7 +5,11 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/backend': 'http://localhost/campusfix'
-    }
-  }
+      '/backend': {
+        target: 'http://localhost',
+        changeOrigin: true,
+        rewrite: (path) => `/campusfix${path}`,
+      },
+    },
+  },
 })

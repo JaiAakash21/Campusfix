@@ -10,13 +10,14 @@ function HistoryTimeline({ history }) {
   return (
     <ul className="list-group list-group-flush">
       {history.map((h, i) => (
-        <li key={i} className="list-group-item px-0">
+        <li key={h.id ?? i} className="list-group-item px-0">
           <div className="d-flex justify-content-between">
             <span>
+              {h.old_status && <><StatusBadge status={h.old_status} /> &rarr; </>}
               <StatusBadge status={h.new_status} />
               {h.note && <span className="ms-2 text-muted small">{h.note}</span>}
             </span>
-            <small className="text-muted">{new Date(h.changed_at).toLocaleString()}</small>
+            <small className="text-muted">{new Date(h.created_at ?? h.changed_at).toLocaleString()}</small>
           </div>
           {h.changed_by_name && (
             <small className="text-muted">by {h.changed_by_name}</small>
@@ -33,7 +34,7 @@ function CommentList({ comments }) {
   return (
     <div>
       {comments.map((c, i) => (
-        <div key={i} className="border rounded p-3 mb-2">
+        <div key={c.id ?? i} className="border rounded p-3 mb-2">
           <div className="d-flex justify-content-between mb-1">
             <strong>{c.author_name ?? 'User'}</strong>
             <small className="text-muted">{new Date(c.created_at).toLocaleString()}</small>
@@ -50,6 +51,9 @@ export default function StaffTicketDetail() {
   const navigate = useNavigate()
 
   const [ticket, setTicket] = useState(null)
+  const [history, setHistory] = useState([])
+  const [comments, setComments] = useState([])
+  const [attachment, setAttachment] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -76,7 +80,13 @@ export default function StaffTicketDetail() {
         return
       }
       const data = await res.json()
-      setTicket(data)
+      setTicket(data.ticket)
+      setHistory(data.history ?? [])
+      setComments(data.comments ?? [])
+      setAttachment(data.attachment ?? null)
+      if (data.ticket?.status) {
+        setNewStatus(data.ticket.status === 'open' ? 'in_progress' : data.ticket.status)
+      }
     } catch {
       setError('Network error. Please try again.')
     } finally {
@@ -90,6 +100,7 @@ export default function StaffTicketDetail() {
 
   async function handleStatusUpdate(e) {
     e.preventDefault()
+    if (!ticket) return
     setStatusError('')
     setStatusSuccess('')
     setStatusLoading(true)
@@ -116,6 +127,7 @@ export default function StaffTicketDetail() {
 
   async function handleCommentSubmit(e) {
     e.preventDefault()
+    if (!ticket) return
     setCommentError('')
     setCommentLoading(true)
     try {
@@ -174,19 +186,19 @@ export default function StaffTicketDetail() {
             <div className="row g-2">
               <div className="col-sm-6"><strong>Category:</strong> {ticket.category_name ?? ticket.category}</div>
               <div className="col-sm-6"><strong>Priority:</strong> {ticket.priority}</div>
-              <div className="col-sm-6"><strong>Submitted by:</strong> {ticket.submitted_by_name ?? '-'}</div>
-              <div className="col-sm-6"><strong>Assigned to:</strong> {ticket.assigned_to_name ?? 'Unassigned'}</div>
+              <div className="col-sm-6"><strong>Submitted by:</strong> {ticket.submitter_name ?? ticket.submitted_by_name ?? '-'}</div>
+              <div className="col-sm-6"><strong>Assigned to:</strong> {ticket.assigned_name ?? ticket.assigned_to_name ?? 'Unassigned'}</div>
               <div className="col-sm-6"><strong>Created:</strong> {new Date(ticket.created_at).toLocaleString()}</div>
             </div>
-            {ticket.attachment_stored_name && (
+            {attachment && (
               <div className="mt-3">
                 <a
-                  href={`/backend/files/serve.php?name=${ticket.attachment_stored_name}`}
+                  href={`/backend/files/serve.php?name=${attachment.stored_name}`}
                   target="_blank"
                   rel="noreferrer"
                   className="btn btn-outline-secondary btn-sm"
                 >
-                  View Attachment
+                  View Attachment ({attachment.original_name ?? 'File'})
                 </a>
               </div>
             )}
@@ -236,13 +248,13 @@ export default function StaffTicketDetail() {
 
         {/* Status history */}
         <h6 className="fw-bold mb-2">Status History</h6>
-        <HistoryTimeline history={ticket.history} />
+        <HistoryTimeline history={history} />
 
         <hr />
 
         {/* Comments */}
-        <h6 className="fw-bold mb-2 mt-3">Comments</h6>
-        <CommentList comments={ticket.comments} />
+        <h6 className="fw-bold mb-2 mt-3">Comments ({comments.length})</h6>
+        <CommentList comments={comments} />
 
         <form onSubmit={handleCommentSubmit} className="mt-3">
           {commentError && <div className="alert alert-danger py-2">{commentError}</div>}

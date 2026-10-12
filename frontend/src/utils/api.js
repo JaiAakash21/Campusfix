@@ -1,10 +1,5 @@
-// Single HTTP client for CampusFix.
-// Call initCsrf() once on app load before any state-changing requests.
-// All other code should use apiGet / apiPost / apiPatch / apiDelete.
-
 let _csrfToken = null;
 
-// Phase 1 of CSRF bootstrap — fetch a token before login/register
 export async function initCsrf() {
     const res = await fetch('/backend/api/auth/csrf.php', { credentials: 'include' });
     if (!res.ok) throw new Error('Could not start session');
@@ -12,12 +7,19 @@ export async function initCsrf() {
     _csrfToken = csrf_token;
 }
 
-// Phase 2 — called after a successful login with the fresh token from me.php
 export function setCsrfToken(token) {
     _csrfToken = token;
 }
 
 async function request(method, path, body) {
+    if (!_csrfToken && !path.includes('/auth/csrf.php')) {
+        try {
+            await initCsrf();
+        } catch {
+            // Non-fatal if server is unreachable
+        }
+    }
+
     const isFormData = body instanceof FormData;
 
     const headers = {
@@ -34,9 +36,11 @@ async function request(method, path, body) {
 
     // Session expired or cookie invalid — redirect to login
     if (res.status === 401) {
-        _csrfToken = null;
-        window.location.href = '/login';
-        return undefined;
+        if (!path.includes('/auth/me.php') && !path.includes('/auth/login.php') && window.location.pathname !== '/login') {
+            _csrfToken = null;
+            window.location.href = '/login';
+            return undefined;
+        }
     }
 
     return res;

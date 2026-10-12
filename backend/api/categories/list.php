@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../../config/db.php';
-require_once __DIR__ . '/../../../utils/helpers.php';
+require_once __DIR__ . '/../../config/db.php';
+require_once __DIR__ . '/../../utils/helpers.php';
 
 // Categories are readable by anyone (used in the ticket submission form)
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
