@@ -26,17 +26,28 @@ export default function LoginPage() {
 
     try {
       const res = await apiPost('/backend/api/auth/login.php', { email, password })
-      const data = await res.json()
+      if (!res) {
+        setError('No response from server. Please reload and try again.')
+        return
+      }
+
+      let data
+      try {
+        data = await res.json()
+      } catch {
+        setError(res.ok ? 'Unexpected response format.' : `Server returned status ${res.status}. Please reload and try again.`)
+        return
+      }
 
       if (!res.ok) {
-        setError(data.error || 'Login failed.')
+        setError(data?.error || `Login failed (${res.status}).`)
         return
       }
 
       auth.login(data, data.csrf_token)
       navigate(dashboardFor(data.role))
-    } catch {
-      setError('Network error. Please try again.')
+    } catch (err) {
+      setError(err?.message || 'Network error. Please try again.')
     } finally {
       setLoading(false)
     }

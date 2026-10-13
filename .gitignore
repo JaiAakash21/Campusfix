@@ -1,5 +1,5 @@
 # Environment — never commit credentials
-backend/.env
+backend/.env*
 
 # Composer
 backend/vendor/
@@ -7,6 +7,10 @@ backend/vendor/
 # Node
 frontend/node_modules/
 frontend/dist/
+
+# Build and Deploy Artifacts
+deploy_package/
+*.zip
 
 # Uploaded files — served via PHP proxy, never committed
 backend/files/uploads/*

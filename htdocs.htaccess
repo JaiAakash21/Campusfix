@@ -1,0 +1,34 @@
+# CampusFix — root htdocs/.htaccess
+# Place this file as .htaccess in your InfinityFree htdocs/ root.
+
+Options -Indexes
+
+# ── Security headers ──────────────────────────────────────────────────────────
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options "DENY"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set X-XSS-Protection "0"
+</IfModule>
+
+# ── PHP API passthrough — let PHP handle /backend/* directly ──────────────────
+# (These files exist on disk, so mod_rewrite won't touch them.)
+
+# ── React SPA routing — redirect all non-file, non-dir requests to index.html ─
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Enforce HTTPS
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Let real files and directories through as-is (assets, PHP, etc.)
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Send everything else to React's index.html
+    RewriteRule ^ index.html [L]
+</IfModule>

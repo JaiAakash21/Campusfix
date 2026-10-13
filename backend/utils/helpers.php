@@ -16,6 +16,15 @@ function send_error(string $message, int $status = 400): never {
     send_json(['error' => $message], $status);
 }
 
+// Global exception handler: guarantees valid JSON even if unhandled exceptions occur
+set_exception_handler(function (Throwable $e): void {
+    error_log((string) $e);
+    $msg = (($_ENV['APP_ENV'] ?? 'development') === 'development')
+        ? $e->getMessage()
+        : 'An unexpected server error occurred. Please try again.';
+    send_error($msg, 500);
+});
+
 function get_json_body(): array {
     $raw = file_get_contents('php://input');
     if ($raw === false || $raw === '') {

@@ -1,10 +1,16 @@
 let _csrfToken = null;
 
 export async function initCsrf() {
-    const res = await fetch('/backend/api/auth/csrf.php', { credentials: 'include' });
-    if (!res.ok) throw new Error('Could not start session');
-    const { csrf_token } = await res.json();
-    _csrfToken = csrf_token;
+    try {
+        const res = await fetch('/backend/api/auth/csrf.php', { credentials: 'include' });
+        if (!res.ok) return null;
+        const data = await res.json();
+        _csrfToken = data?.csrf_token || null;
+        return _csrfToken;
+    } catch (err) {
+        console.warn('CSRF token fetch failed:', err);
+        return null;
+    }
 }
 
 export function setCsrfToken(token) {
@@ -12,12 +18,9 @@ export function setCsrfToken(token) {
 }
 
 async function request(method, path, body) {
-    if (!_csrfToken && !path.includes('/auth/csrf.php')) {
-        try {
-            await initCsrf();
-        } catch {
-            // Non-fatal if server is unreachable
-        }
+    const isMutation = ['POST', 'PATCH', 'DELETE'].includes(method.toUpperCase());
+    if (!_csrfToken && !path.includes('/auth/csrf.php') && isMutation) {
+        await initCsrf();
     }
 
     const isFormData = body instanceof FormData;

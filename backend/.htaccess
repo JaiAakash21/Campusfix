@@ -1,0 +1,54 @@
+# CampusFix — backend/.htaccess
+# Blocks direct HTTP access to sensitive backend files.
+# PHP endpoints (api/, files/serve.php) are still reachable normally.
+
+# Block .env and environment files
+<Files ".env">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</Files>
+
+# Block composer metadata
+<Files "composer.json">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</Files>
+
+<Files "composer.lock">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</Files>
+
+# Block vendor/ directory browsing and direct access
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^vendor/ - [F,L]
+    RewriteRule ^config/ - [F,L]
+    RewriteRule ^middleware/ - [F,L]
+    RewriteRule ^utils/ - [F,L]
+</IfModule>
+
+# Suppress PHP errors from reaching visitors in production
+<IfModule mod_php.c>
+    php_flag display_errors Off
+    php_flag log_errors On
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag display_errors Off
+    php_flag log_errors On
+</IfModule>

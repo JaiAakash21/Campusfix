@@ -26,8 +26,12 @@ function get_db(): PDO {
         PDO::ATTR_EMULATE_PREPARES   => false,
     ]);
 
-    // All timestamps in this session will display in UTC
-    $pdo->exec("SET time_zone = '+00:00'");
+    // SET time_zone requires SUPER on some shared hosts — silently skip if denied
+    try {
+        $pdo->exec("SET time_zone = '+00:00'");
+    } catch (PDOException $e) {
+        // Shared host restricts SET time_zone; server default timezone applies
+    }
 
     return $pdo;
 }
