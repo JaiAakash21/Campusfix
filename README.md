@@ -1,5 +1,7 @@
 # CampusFix
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE) [![Live demo](https://img.shields.io/badge/Live%20demo-online-brightgreen?style=flat-square)](https://campusfix.free.nf/) ![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=white) ![PHP](https://img.shields.io/badge/PHP-777BB4?style=flat-square&logo=php&logoColor=white) ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white)
+
 A modern campus issue and maintenance tracking portal connecting students, staff, and administrators.
 
 **Live Deployment:** [https://campusfix.free.nf/](https://campusfix.free.nf/) · Health Check: [`/backend/api/health.php`](https://campusfix.free.nf/backend/api/health.php)
@@ -114,3 +116,11 @@ The packaging script will:
 3. Verify the root contains `index.html`, `.htaccess`, `assets/`, and `backend/`.
 4. Ensure `backend/files/uploads/` has write permissions (`755`).
 5. Access your deployment at **`https://campusfix.free.nf/`**.
+
+## License
+
+Distributed under the MIT License. See [LICENSE](LICENSE) for details.
+
+## Author
+
+Built by [Jai Aakash S](https://github.com/JaiAakash21) · [Portfolio](https://jaiaakash.xyz) · [LinkedIn](https://www.linkedin.com/in/jaiaakash21)
